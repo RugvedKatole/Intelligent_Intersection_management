@@ -1,0 +1,39 @@
+<routes>
+	<vType id="vtypeauto" accel="5" decel="10" sigma="0.0" length="4"
+	minGap="2" maxSpeed="11" color="1,1,0" probability="1"
+	carFollowModel="CC" tauEngine="0.5" omegaN="0.2" xi="1" c1="0.5"
+	lanesCount="4" ccAccel="4" ploegKp="0.2" ploegKd="0.7"
+	ploegH="0.5" 
+	/>
+	<!-- minGap is controlled by plexe parameters 
+	<gui_only>
+        <lateral-resolution value="1.0"/>
+    </gui_only>
+	--> 
+
+	<route id="a_1" edges="e1 e7"/>
+	<route id="a_2" edges="e1 e8"/>
+	<route id="a_3" edges="e1 e9"/>
+    <route id="a_4" edges="e1 e10"/>	
+
+    <route id="b_1" edges="e2 e8"/>
+	<route id="b_2" edges="e2 e9"/>
+	<route id="b_3" edges="e2 e10"/>
+    <route id="b_4" edges="e2 e6"/>
+
+    <route id="c_1" edges="e3 e9"/>
+	<route id="c_2" edges="e3 e10"/>
+	<route id="c_3" edges="e3 e6"/>
+    <route id="c_4" edges="e3 e7"/>
+
+    <route id="d_1" edges="e4 e10"/>
+	<route id="d_2" edges="e4 e6"/>
+	<route id="d_3" edges="e4 e7"/>
+    <route id="d_4" edges="e4 e8"/>
+
+    <route id="e_1" edges="e5 e6"/>
+	<route id="e_2" edges="e5 e7"/>
+	<route id="e_3" edges="e5 e8"/>
+    <route id="e_4" edges="e5 e9"/>
+	
+</routes>

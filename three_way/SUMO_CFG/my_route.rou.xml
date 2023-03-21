@@ -1,0 +1,23 @@
+<routes>
+	<vType id="vtypeauto" accel="5" decel="10" sigma="0.0" length="4"
+	minGap="2" maxSpeed="11" color="1,1,0" probability="1"
+	carFollowModel="CC" tauEngine="0.5" omegaN="0.2" xi="1" c1="0.5"
+	lanesCount="4" ccAccel="4" ploegKp="0.2" ploegKd="0.7"
+	ploegH="0.5"/>
+	<!-- minGap is controlled by plexe parameters 
+	<gui_only>
+        <lateral-resolution value="1.0"/>
+    </gui_only>
+	-->
+
+	<route id="a_1" edges="a+ b-"/>
+	<route id="a_2" edges="a+ c-"/>	
+
+	<route id="b_1" edges="b+ c-"/>	
+	<route id="b_2" edges="b+ a-"/>
+
+	<route id="c_1" edges="c+ a-"/>	
+	<route id="c_2" edges="c+ b-"/>
+
+	
+</routes>
