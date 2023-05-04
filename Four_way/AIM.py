@@ -1,5 +1,4 @@
 #!usr/bin/env python3
-#!/usr/bin/env python
 
 #5-way
 
@@ -25,7 +24,7 @@ from plexe import Plexe, ACC, CACC
 
 def add_single_platoon(plexe, step, lane):
     vid = "v%d.%s" %(step/ADD_PLATOON_STEP, lane)
-    routeID = lane   # route 0~11, one-to-one map with lane
+    routeID = lane   # Lanes as per the conflict matrix
     traci.vehicle.add(vid, routeID, typeID="vtypeauto")        
     plexe.set_path_cacc_parameters(vid, DISTANCE, 2, 1, 0.5)
     plexe.set_cc_desired_speed(vid, random.randint(4,10))
@@ -38,7 +37,7 @@ def add_single_platoon(plexe, step, lane):
 
 
 def add_platoons(plexe,step):
-    for lane in LANE_NUM:    # lane 0~11
+    for lane in LANE_NUM:
         if random.random() < ADD_PLATOON_PRO:
             add_single_platoon(plexe,step, lane)
 
@@ -48,10 +47,14 @@ def intersect(A: list, B:list):
 
 def intersection_manger(input_vehs,conflict_matrix):
     """THE ACTUAL ALGORITHM"""
+    input_vehs= [".".join([i.split(".")[1],i.split(".")[0]]) for i in input_vehs]
+    input_vehs = sorted(input_vehs)
+    input_vehs = [".".join([i.split(".")[1],i.split(".")[0]]) for i in input_vehs]
     input = [i.split(".")[-1] if i != 0 else 0 for i in input_vehs]
     output_list = input
     cand_list = {}
     least_count = len(input) + 1
+    interim_lst =[]
     for i in output_list:
         temp = []
         for j in output_list:
@@ -66,9 +69,9 @@ def intersection_manger(input_vehs,conflict_matrix):
         if count < least_count:
             frze_var = i
             least_count = count
-    
     if least_count == len(input)-1:
         output_list = cand_list[frze_var]
+        output_list = [k for k,j in zip(input_vehs,cand_list[frze_var]) if j!=0]
     else:
         least_count = len(input) + 1
     try:
@@ -77,15 +80,26 @@ def intersection_manger(input_vehs,conflict_matrix):
                 for i in cand_list[frze_var]:
                     if i != j and i != 0:
                         interim = intersect(cand_list[i],cand_list[j])
-                        if interim.count(0) < least_count:
+                        if interim.count(0) <= least_count:
                             least_count = interim.count(0)
-                            output_list = interim
+                            output_list = [k for k,j in zip(input_vehs,interim) if j!=0]
+        for j in cand_list[frze_var]:
+            if j!= 0:
+                for i in cand_list[frze_var]:
+                    if i != j and i != 0:
+                        interim = intersect(cand_list[i],cand_list[j])
+                        if interim.count(0) == least_count:
+                            interim_lst.append(interim)
+        if len(interim_lst) != 0:
+            for i in range(len(interim_lst)):
+                interim_lst[i] = [k for k,j in zip(input_vehs,interim_lst[i]) if j!=0]
+            interim_lst = [sorted(i) for i in interim_lst]
+            print(sorted(interim_lst))
+            output_list = sorted(interim_lst)[0]
     except UnboundLocalError:
-        # print("OUTPUT_IM")
         pass
-    return output_list
+    return output_list, input_vehs
 
-# def Get_first_veh(id_list):
 
 
 def main():
@@ -103,7 +117,7 @@ def main():
     serving_list = []  
     action_list = []
     input_vehs =[0,0,0,0,0]
-    while step < 1000000:  # 1 hour       
+    while step < 3600000:  # 1 hour       
         
         traci.simulationStep()
 
@@ -115,18 +129,16 @@ def main():
         try:
             for veh in topology:            
                 odometry = traci.vehicle.getDistance(veh)
-                if (veh not in serving_list) and (492-APPROACHING_RGN <= odometry < 492-DETECTION_RGN): 
+                if (veh not in serving_list) and (JUNC_BOUND-APPROACHING_RGN <= odometry < JUNC_BOUND-DETECTION_RGN): 
                     serving_list.append(veh)
                     plexe.set_cc_desired_speed(veh, 4.0) 
-                # if (veh in serving_list) and (492-10 <= odometry < 492-6):
-                #     traci.vehicle.setSpeed(veh, 1.0)  
+
                 if (508<odometry) and (veh in serving_list):
                     serving_list.remove(veh)
 
-            #serving_list[:] = [element for element in serving_list if element in topology]
             for veh in topology:
                 odometry = traci.vehicle.getDistance(veh)
-                if (492 - DETECTION_RGN <= odometry <= 492) :
+                if (JUNC_BOUND - DETECTION_RGN <= odometry <= JUNC_BOUND) :
 
                     if (veh not in output_list_ids):
                         plexe.set_cc_desired_speed(veh, 0.0)
@@ -141,46 +153,35 @@ def main():
                 if (odometry > 506 ) and (veh in action_list):
                     action_list.remove(veh)
 
-                if odometry>492 and veh not in action_list:
+                if odometry>JUNC_BOUND and veh not in action_list:
                     plexe.set_cc_desired_speed(veh, 50.0)
 
-                if (492 < odometry <= 508):
-                    #plexe.set_cc_desired_speed(veh,10.0)
+                if (JUNC_BOUND < odometry <= 508):
                     c+=1
-                if veh in output_list_ids and odometry < 492:
-                    c+=1
-            # print(action_list,c)
-            # for veh in action 
+                
+            for veh in serving_list:
+                odometry = traci.vehicle.getDistance(veh)
+                if JUNC_BOUND - DETECTION_RGN <= odometry + VEHICLE_LENGTH and veh not in serving_list:
+                    #c += 1 #block the junction until the vehicle in vincity arrives in for decision making
+                    serving_list.append(veh)
+
+                if JUNC_BOUND <= odometry +  VEHICLE_LENGTH/2 and veh in action_list:
+                    c += 1 
+                    plexe.set_cc_desired_speed(veh,50)
+
+                # if veh in output_list_ids and odometry < 492:  #Centralized condition avoids jamming
+                #     c+=1
 
             if c==0:
-                #output_list_ids = [0, 0, 0, 0]
-                output_list = intersection_manger(action_list,conflict_matrix)
-                if output_list==None:
-                    output_list=[0,0,0,0]
-                output_list_ids = [k for k,j in zip(action_list,output_list) if j!=0]
-
-            # print(output_list_ids,"output")
+                output_list_ids,action_list = intersection_manger(action_list,conflict_matrix)
+                if output_list_ids==None:
+                    output_list_ids=[0,0,0,0]
+                # output_list_ids = [k for k,j in zip(action_list,output_list) if j!=0]
+            
+            print(c,output_list_ids,"output",action_list,"Serve",serving_list)
             for veh in output_list_ids:
                 if veh!=0:
                     plexe.set_cc_desired_speed(veh, 10.0)
-                    # print(veh,traci.vehicle.getSpeed(veh))
-                    # if traci.vehicle.getSpeed(veh) == 0 and traci.vehicle.getDistance(veh) > 488.0:
-                    #     traci.vehicle.remove(veh)
-                    #     if veh in output_list_ids:
-                    #         output_list_ids.remove(veh)
-                    #     if veh in action_list:
-                    #         action_list.remove(veh)
-                    #     if veh in serving_list:
-                    #         serving_list.remove(veh)
-            # for veh in action_list:
-            #     if traci.vehicle.getSpeed(veh) == 0 and traci.vehicle.getDistance(veh) > 488 and veh not in output_list_ids:
-            #         traci.vehicle.remove(veh)
-            #         if veh in output_list_ids:
-            #             output_list_ids.remove(veh)
-            #         if veh in action_list:
-            #             action_list.remove(veh)
-            #         if veh in serving_list:
-            #             serving_list.remove(veh)
         except traci.exceptions.TraCIException:
             print(traci.exceptions.TraCIException)
             if veh in serving_list:
@@ -204,14 +205,15 @@ if __name__ == "__main__":
     for i in df.columns:
         conflict_matrix[i]=[j for j in df[i] if j!= '0' or j!= 0]
     APPROACHING_SPEED = 2
-    # VEHICLE_LENGTH = 4
+    JUNC_BOUND = 490
+    VEHICLE_LENGTH = 4
     DISTANCE = 6  # inter-vehicle distance
     DETECTION_RGN = 5
     APPROACHING_RGN = 20 + DETECTION_RGN
     # LANE_NUM = list(df.columns)
     LANE_NUM = conflict_matrix.keys()
     SPEED = 16.6  # m/s
-    ADD_PLATOON_PRO = 0.25
-    ADD_PLATOON_STEP = 300# int(sys.argv[1])
+    ADD_PLATOON_PRO = 0.50
+    ADD_PLATOON_STEP = 1200# int(sys.argv[1])
     N = 4  #nway junction
     main()

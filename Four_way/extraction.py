@@ -31,4 +31,4 @@ def get_time():
     total = c+len(final_waiting)
     return avg, var, vaporised, total, c/total
 
-print(get_time())
+print(get_time()) 
