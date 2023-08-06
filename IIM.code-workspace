@@ -2,6 +2,9 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "../uncatogorised/Sushant_MTP/sushant_MTP"
 		}
 	],
 	"settings": {}

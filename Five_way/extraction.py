@@ -2,10 +2,10 @@
 import bs4
 from bs4 import BeautifulSoup as bs
 import statistics
-def get_time():
+def get_time(path):
     content = []
     # Read the XML file
-    with open("/home/arms04/autonomous_driving_stack/Sushant_MTP/sushant_MTP/Practice/five_way/my_output_file.xml", "r") as file:
+    with open("/home/arms04/autonomous_driving_stack/Intelligent_Intersection_management/Five_way/{}".format(path), "r") as file:
         # Read each line in the file, readlines() returns a list of lines
         content = file.read()
         # Combine the lines in the list into a string
@@ -16,17 +16,30 @@ def get_time():
     #print(result)
     #waiting_time = bs_content.find("tripinfo")
     #print(result)
-    final=[]
+    final_waiting={"a":[],"b":[],"c":[],"d":[],"e":[]}
+    avg ={}
+    var =[]
+    c=0
+    b=0
     for i in result:
         if i["vaporized"] == "":
-            fop= i['waitingtime']
-            final.append(float(fop))
+            final_waiting[i["id"].split(".")[1].split("_")[0]].append(i['waitingtime'])
+            # fop= i['waitingtime']
+            # final_waiting.append(float(fop))
+            b+=1
         else:
             print(i["vaporized"])
-        #print(fop)
-    avg = statistics.mean(final)
-    var = statistics.variance(final)
-    return avg, var
+            c+=1
 
-print(get_time())
+    for i in final_waiting.keys():
+        final_waiting[i] = map(float,final_waiting[i])
+        avg[i]=statistics.mean(final_waiting[i])
+        # var=statistics.mean(list(avg.items()))
+        # var.append(statistics.variance(final_waiting[i]))
+    var = statistics.mean(avg.values())
+    vaporised = c
+    total = c+b
+    return avg, var, vaporised, total, c/total
 
+if __name__ == "__main__":
+    print(get_time("Results/300_Five_way.xml"))

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2023-08-02 12:37:54 by Eclipse SUMO GUI Version 1.18.0
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="/home/arms04/autonomous_driving_stack/Intelligent_Intersection_management/Traditional_trafic_lights (copy)/SUMO_CFG/my_network.net.xml"/>
+        <route-files value="/home/arms04/autonomous_driving_stack/Intelligent_Intersection_management/Traditional_trafic_lights (copy)/SUMO_CFG/my_route.rou.xml"/>
+    </input>
+
+    <output>
+        <tripinfo-output value="output_file.xml"/>
+    </output>
+
+    <time>
+        <step-length value="0.01"/>
+    </time>
+
+    <processing>
+        <lateral-resolution value="3"/>
+    </processing>
+
+    <report>
+        <duration-log.statistics value="true"/>
+    </report>
+
+    <traci_server>
+        <remote-port value="50377"/>
+    </traci_server>
+
+    <gui_only>
+        <gui-settings-file value="/home/arms04/autonomous_driving_stack/Intelligent_Intersection_management/Traditional_trafic_lights (copy)/SUMO_CFG/my_gui.gui.xml"/>
+        <start value="true"/>
+    </gui_only>
+
+</configuration>
+-->
+
+<tripinfos xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/tripinfo_file.xsd">
+</tripinfos>

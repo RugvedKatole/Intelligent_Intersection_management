@@ -1,15 +1,15 @@
 #!usr/bin/env python3
 
-#5-way
+#4-way
 
 import os
 import sys
 from math import sqrt
-import time
+import numpy as np
 import pandas as pd
 import random
 #from utils import communicate
-
+import networkx as nx
 
 from itertools import product
 #
@@ -37,75 +37,37 @@ def add_single_platoon(plexe, step, lane):
 
 
 def add_platoons(plexe,step):
-    for lane in LANE_NUM:
-        if random.random() < ADD_PLATOON_PRO:
-            add_single_platoon(plexe,step, lane)
+    spawn_vehs = np.random.poisson(TRAFFIC_DENSITY*N)
+    Manuevers = random.sample(LANE_NUM,spawn_vehs)
+    for lane in Manuevers:
+        add_single_platoon(plexe,step, lane)
 
 def intersect(A: list, B:list):
     """ intersects two lists"""
     return [i if i ==j else 0 for i,j in zip(A,B)]
 
-def intersection_manger(input_vehs,conflict_matrix):
+def intersection_manger(input_vehs,G: nx.graph):
     """THE ACTUAL ALGORITHM"""
-    input_vehs= [".".join([i.split(".")[1],i.split(".")[0]]) for i in input_vehs]
-    input_vehs = sorted(input_vehs)
-    input_vehs = [".".join([i.split(".")[1],i.split(".")[0]]) for i in input_vehs]
-    input = [i.split(".")[-1] if i != 0 else 0 for i in input_vehs]
+    incoming = {}
+    for i in input_vehs:
+        incoming[i.split(".")[1]] = i.split(".")[0]
+    # input_vehs= [".".join([i.split(".")[1],i.split(".")[0]]) for i in input_vehs]
+    # input_vehs = sorted(input_vehs)
+    # input_vehs = [".".join([i.split(".")[1],i.split(".")[0]]) for i in input_vehs]
+    input = incoming.keys()
     output_list = input
-    cand_list = {}
-    least_count = len(input) + 1
-    interim_lst =[]
-    for i in output_list:
-        temp = []
-        for j in output_list:
-            if i==0:
-                temp.append(0)
-            elif j not in conflict_matrix[i]:
-                temp.append(j)
-            else:
-                temp.append(0)
-        cand_list[i] = temp
-        count = temp.count(0)
-        if count < least_count:
-            frze_var = i
-            least_count = count
-    if least_count == len(input)-1:
-        output_list = cand_list[frze_var]
-        output_list = [k for k,j in zip(input_vehs,cand_list[frze_var]) if j!=0]
-    else:
-        least_count = len(input) + 1
-    try:
-        for j in cand_list[frze_var]:
-            if j!= 0:
-                for i in cand_list[frze_var]:
-                    if i != j and i != 0:
-                        interim = intersect(cand_list[i],cand_list[j])
-                        if interim.count(0) <= least_count:
-                            least_count = interim.count(0)
-                            output_list = [k for k,j in zip(input_vehs,interim) if j!=0]
-        for j in cand_list[frze_var]:
-            if j!= 0:
-                for i in cand_list[frze_var]:
-                    if i != j and i != 0:
-                        interim = intersect(cand_list[i],cand_list[j])
-                        if interim.count(0) == least_count:
-                            interim_lst.append(interim)
-        if len(interim_lst) != 0:
-            for i in range(len(interim_lst)):
-                interim_lst[i] = [k for k,j in zip(input_vehs,interim_lst[i]) if j!=0]
-            interim_lst = [sorted(i) for i in interim_lst]
-            print(sorted(interim_lst))
-            output_list = sorted(interim_lst)[0]
-    except UnboundLocalError:
-        pass
+    Gs = G.subgraph(input)
+    output_list = sorted(sorted(list(nx.find_cliques(Gs)),key=len,reverse=True),key=lambda clique: sorted(clique,key=lambda man: man.split("_")[0]))
+    if len(output_list) != 0:
+        output_list = [".".join([incoming[j],j]) for j in output_list[0]]
     return output_list, input_vehs
 
 
 
 def main():
     directory = "/home/arms04/autonomous_driving_stack/Intelligent_Intersection_management/Four_way"
-    sumo_cmd = ['sumo-gui', '--duration-log.statistics', '--tripinfo-output',
-                 '{}/SUMO_CFG/my_output_file.xml'.format(directory),
+    sumo_cmd = ['sumo', '--duration-log.statistics', '--tripinfo-output',
+                 '{}/{}'.format(directory,sys.argv[2]),
                  '-c', '{}/SUMO_CFG/my_confg.sumo.cfg'.format(directory)]
     
     traci.start(sumo_cmd)
@@ -116,11 +78,11 @@ def main():
     topology = []
     serving_list = []  
     action_list = []
-    input_vehs =[0,0,0,0,0]
-    while step < 3600000:  # 1 hour       
+    input_vehs = [0,0,0,0,0]
+    while step < 360000:  # *0.01 hour       
         
         traci.simulationStep()
-
+        print(step/100)
         if step % ADD_PLATOON_STEP == 0:  # add new platoon every X steps
             add_platoons(plexe,step) 
 
@@ -173,17 +135,17 @@ def main():
                 #     c+=1
 
             if c==0:
-                output_list_ids,action_list = intersection_manger(action_list,conflict_matrix)
+                output_list_ids,action_list = intersection_manger(action_list,G)
                 if output_list_ids==None:
                     output_list_ids=[0,0,0,0]
                 # output_list_ids = [k for k,j in zip(action_list,output_list) if j!=0]
             
-            print(c,output_list_ids,"output",action_list,"Serve",serving_list)
+            # print(c,output_list_ids,"output",action_list,"Serve",serving_list)
             for veh in output_list_ids:
                 if veh!=0:
                     plexe.set_cc_desired_speed(veh, 10.0)
         except traci.exceptions.TraCIException:
-            print(traci.exceptions.TraCIException)
+            # print(traci.exceptions.TraCIException)
             if veh in serving_list:
                 serving_list.remove(veh)
             if veh in output_list_ids:
@@ -192,7 +154,7 @@ def main():
                 action_list.remove(veh)
 
         step += 1
-        # print(step)
+        print(step)
     traci.close()
         
         
@@ -201,9 +163,17 @@ def main():
 if __name__ == "__main__":
 
     conflict_matrix = {}
-    df = pd.read_csv("/home/arms04/autonomous_driving_stack/Intelligent_Intersection_management/Four_way/conflict_matrix_4way.csv")
+    df = pd.read_csv("/home/arms04/autonomous_driving_stack/Intelligent_Intersection_management/Four_way/conflict_matrix_4way_compliment.csv")
     for i in df.columns:
         conflict_matrix[i]=[j for j in df[i] if j!= '0' or j!= 0]
+
+    G = nx.Graph()
+    G.add_nodes_from(df.columns)
+    # print(G.nodes)
+    for i in df.columns:
+        for j in df[i]:
+            if j != "0":
+                G.add_edge(i,j)
     APPROACHING_SPEED = 2
     JUNC_BOUND = 490
     VEHICLE_LENGTH = 4
@@ -213,7 +183,8 @@ if __name__ == "__main__":
     # LANE_NUM = list(df.columns)
     LANE_NUM = conflict_matrix.keys()
     SPEED = 16.6  # m/s
+    TRAFFIC_DENSITY = int(sys.argv[1])/3600 # density in PCU/hr/lane dvide by 3600 to get per second
     ADD_PLATOON_PRO = 0.50
-    ADD_PLATOON_STEP = 1200# int(sys.argv[1])
+    ADD_PLATOON_STEP = 100 # int(sys.argv[1])
     N = 4  #nway junction
     main()
