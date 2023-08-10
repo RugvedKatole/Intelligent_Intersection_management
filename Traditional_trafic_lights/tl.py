@@ -25,16 +25,35 @@ from plexe import Plexe, ACC, CACC
 def add_single_platoon(plexe, step, lane):
     vid = "v%d.%s" %(step/ADD_PLATOON_STEP, lane)
     routeID = lane   # Lanes as per the conflict matrix
-    traci.vehicle.add(vid, routeID, typeID="vtypeauto")        
+    traci.vehicle.add(vid, routeID, typeID="vtypeauto") 
+    # plexe.set_cc_desired_speed(vid, random.randint(4,10))
+    plexe.set_path_cacc_parameters(vid, DISTANCE, 2, 1, 0.5)       
+    plexe.set_acc_headway_time(vid, 1.5)
+    plexe.use_controller_acceleration(vid, False)
+    plexe.set_fixed_lane(vid, lane, False)
     traci.vehicle.setSpeedMode(vid, 31)        
-    traci.vehicle.setColor(vid, (255,255,255, 255))  # red
+    plexe.set_active_controller(vid, ACC)
+    # traci.vehicle.setColor(vid, (255,255,255, 255))  # red
 
 
 def add_platoons(plexe,step):
-    spawn_vehs = np.random.poisson(TRAFFIC_DENSITY*N)
-    Manuevers = random.sample(LANE_NUM,spawn_vehs)
-    for lane in Manuevers:
-        add_single_platoon(plexe,step, lane)
+    grouped_lanes = group_keys(LANE_NUM)
+    for i in range(len(group_keys(LANE_NUM))):
+        spawn_vehs = np.random.poisson(TRAFFIC_DENSITY[i])
+        Manuevers = random.sample(grouped_lanes[i],spawn_vehs)
+        for lane in Manuevers:
+            add_single_platoon(plexe,step, lane)
+
+def group_keys(keys):
+    grouped_dict = {}
+    for key in keys:
+        starting_letter = key[0]
+        if starting_letter in grouped_dict:
+            grouped_dict[starting_letter].append(key)
+        else:
+            grouped_dict[starting_letter] = [key]
+        grouped_list = list(grouped_dict.values())
+    return grouped_list
 
 
 def main():
@@ -73,8 +92,10 @@ if __name__ == "__main__":
 
     # LANE_NUM = list(df.columns)
     LANE_NUM = conflict_matrix.keys()
-    SPEED = 16.6  # m/s
-    TRAFFIC_DENSITY = int(sys.argv[1])/3600 # density in PCU/hr/lane dvide by 3600 to get per second
-    ADD_PLATOON_STEP = 100 # int(sys.argv[1])
     N = 4  #nway junction
+    SPEED = 16.6  # m/s
+    TRAFFIC_DENSITY = np.array([0.4,0.3,0.2,0.1])*(int(sys.argv[1])*N/3600) # density in PCU/hr/lane dvide by 3600 to get per second
+    DISTANCE = 6
+    ADD_PLATOON_STEP = 100 # int(sys.argv[1])
+    
     main()

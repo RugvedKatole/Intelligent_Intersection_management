@@ -24,7 +24,7 @@ def add_single_platoon(plexe, topology, step, lane):
         routeID = lane   # route 0~11, one-to-one map with lane
         traci.vehicle.add(vid, routeID, typeID="vtypeauto")        
         plexe.set_path_cacc_parameters(vid, DISTANCE, 2, 1, 0.5)
-        plexe.set_cc_desired_speed(vid, SPEED)
+        # plexe.set_cc_desired_speed(vid, SPEED)
         plexe.set_acc_headway_time(vid, 1.5)
         plexe.use_controller_acceleration(vid, False)
         plexe.set_fixed_lane(vid, lane, False)
@@ -41,10 +41,24 @@ def add_single_platoon(plexe, topology, step, lane):
 
 
 def add_platoons(plexe, topology, step):
-    spawn_vehs = np.random.poisson(TRAFFIC_DENSITY*N)
-    Manuevers = random.sample(LANE_NUM,spawn_vehs)
-    for lane in Manuevers:
-        add_single_platoon(plexe, topology, step, lane)
+    grouped_lanes = group_keys(LANE_NUM)
+    for i in range(len(group_keys(LANE_NUM))):
+        spawn_vehs = np.random.poisson(TRAFFIC_DENSITY[i])
+        Manuevers = random.sample(grouped_lanes[i],spawn_vehs)
+        for lane in Manuevers:
+            add_single_platoon(plexe, topology, step, lane)
+
+def group_keys(keys):
+    grouped_dict = {}
+    for key in keys:
+        starting_letter = key[0]
+        if starting_letter in grouped_dict:
+            grouped_dict[starting_letter].append(key)
+        else:
+            grouped_dict[starting_letter] = [key]
+    
+    grouped_list = list(grouped_dict.values())
+    return grouped_list
 
 
 def compute_leaving_time(veh):
@@ -126,7 +140,7 @@ def main():
                     if max_leaving_time == 0.00001:
                         serving_list[i][3] = 0
                         distance = 400 + PLATOON_LENGTH + STOP_LINE - traci.vehicle.getDistance(veh_i)
-                        desired_speed = sqrt(2 * MAX_ACCEL * distance + (traci.vehicle.getSpeed(veh_i))**2)
+                        desired_speed = np.clip(sqrt(2 * MAX_ACCEL * distance + (traci.vehicle.getSpeed(veh_i))**2),0,20)
                         plexe.set_cc_desired_speed(veh_i, desired_speed)
                         serving_list[i][2] = (desired_speed - traci.vehicle.getSpeed(veh_i)) / MAX_ACCEL
                         #serving_list[i][2] = compute_leaving_time(veh_i)
@@ -139,6 +153,7 @@ def main():
                         decel = 2 * (current_speed * max_leaving_time - distance_to_stop_line)/(max_leaving_time **2)
                         desired_speed = current_speed - decel * max_leaving_time
                         #desired_speed = (distance_to_stop_line) / max_leaving_time
+                        desired_speed = np.clip(desired_speed,0,20)
                         plexe.set_cc_desired_speed(veh_i, desired_speed)
                         serving_list[i][2] = (distance_to_stop_line + PLATOON_LENGTH + 2*STOP_LINE)/current_speed
                         """
@@ -205,13 +220,11 @@ if __name__ == "__main__":
     PLATOON_SIZE = 1
     SPEED = 16.6  # m/s
     V2I_RANGE = 200 
-    PLATOON_LENGTH = VEHICLE_LENGTH * PLATOON_SIZE + DISTANCE * (PLATOON_SIZE - 1)
-    TRAFFIC_DENSITY = int(sys.argv[1])/3600
-    ADD_PLATOON_PRO = 0.25  
-    ADD_PLATOON_STEP = 300
-    MAX_ACCEL = 2.6
-    #DECEL = SPEED**2/(2*(V2I_RANGE-25))  
-    #DECEL = 3.5
-    STOP_LINE = 20.0
     N=4
+    PLATOON_LENGTH = VEHICLE_LENGTH * PLATOON_SIZE + DISTANCE * (PLATOON_SIZE - 1)
+    TRAFFIC_DENSITY = np.array([0.25,0.25,0.25,0.25])*(int(sys.argv[1])*N/3600) 
+    ADD_PLATOON_STEP = 100
+    MAX_ACCEL = 2.6
+    STOP_LINE = 20.0
+    
     main()

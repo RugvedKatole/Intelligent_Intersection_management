@@ -23,7 +23,7 @@ def get_time(path):
     b=0
     for i in result:
         if i["vaporized"] == "":
-            final_waiting[i["id"].split(".")[1].split("_")[0]].append(i['waitingtime'])
+            final_waiting[i["id"].split(".")[1].split("_")[0]].append(i['duration'])
             # fop= i['waitingtime']
             # final_waiting.append(float(fop))
             b+=1
@@ -42,4 +42,4 @@ def get_time(path):
     return avg, var, vaporised, total, c/total
 
 if __name__ == "__main__":
-    print(get_time('Results/250_three_way.xml'))
+    print(get_time('p.xml'))

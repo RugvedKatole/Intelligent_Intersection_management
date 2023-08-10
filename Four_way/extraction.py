@@ -17,6 +17,7 @@ def get_time(path):
     #waiting_time = bs_content.find("tripinfo")
     #print(result)
     final_waiting={"a":[],"b":[],"c":[],"d":[]}
+    together =[]
     avg ={}
     var =[]
     c=0
@@ -24,6 +25,7 @@ def get_time(path):
     for i in result:
         if i["vaporized"] == "":
             final_waiting[i["id"].split(".")[1].split("_")[0]].append(i['waitingtime'])
+            together.append(float(i['waitingtime']))
             # fop= i['waitingtime']
             # final_waiting.append(float(fop))
             b+=1
@@ -36,10 +38,10 @@ def get_time(path):
         avg[i]=statistics.mean(final_waiting[i])
         # var=statistics.mean(list(avg.items()))
         # var.append(statistics.variance(final_waiting[i]))
-    
+    var =statistics.mean(avg.values())
     vaporised = c
     total = c+b
-    return avg, var, vaporised, total, c/total
+    return  var,statistics.mean(together), vaporised, total, avg
 
 if __name__ == "__main__":
-    print(get_time('Results/500_Four_way.xml'))
+    print(get_time('p.xml'))

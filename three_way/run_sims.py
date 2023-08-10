@@ -11,10 +11,10 @@ from datetime import datetime
 
 Main_dir ="/home/arms04/autonomous_driving_stack/Intelligent_Intersection_management/three_way/"
 
-for j in ["150","200","250","300","350"]:
+for j in ["350"]:
 # def func(j):
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-    results_dir = 'Results/{}_three_way.xml'.format(j)
+    results_dir = '../results/1_hour/{}_three_way.xml'.format(j)
     os.system('python3 {}AIM.py {} {}'.format(Main_dir,j,results_dir))
     os.system('notify-send "Simulation completed for {} PCUs/lane/hr"'.format(j))
     with open('/home/arms04/autonomous_driving_stack/Intelligent_Intersection_management/three_way/comp.csv','a+') as f:

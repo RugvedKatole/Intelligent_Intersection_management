@@ -104,14 +104,14 @@
         <lane id="d-_0" index="0" speed="14.00" length="492.80" shape="492.80,498.40 0.00,498.40"/>
     </edge>
 
-    <tlLogic id="5" type="delay_based" programID="0" offset="0">
-        <phase duration="5" state="GGGrrrrrrrrr" minDur="3" maxDur="50"/>
+    <tlLogic id="5" type="actuated" programID="0" offset="0">
+        <phase duration="61.75" state="GGGrrrrrrrrr" minDur="3" maxDur="50"/>
         <phase duration="2"  state="yyyrrrrrrrrr"/>
-        <phase duration="5" state="rrrGGGrrrrrr" minDur="3" maxDur="50"/>
+        <phase duration="61.75" state="rrrGGGrrrrrr" minDur="3" maxDur="50"/>
         <phase duration="2"  state="rrryyyrrrrrr"/>
-        <phase duration="5" state="rrrrrrGGGrrr" minDur="3" maxDur="50"/>
+        <phase duration="61.75" state="rrrrrrGGGrrr" minDur="3" maxDur="50"/>
         <phase duration="2"  state="rrrrrryyyrrr"/>
-        <phase duration="5" state="rrrrrrrrrGGG" minDur="3" maxDur="50"/>
+        <phase duration="61.75" state="rrrrrrrrrGGG" minDur="3" maxDur="50"/>
         <phase duration="2"  state="rrrrrrrrryyy"/>
         <param key="barrier2Phases" value="2,6"/>
         <param key="barrierPhases" value="4,8"/>

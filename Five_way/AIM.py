@@ -28,7 +28,7 @@ def add_single_platoon(plexe, step, lane):
     routeID = lane   # Lanes as per the conflict matrix
     traci.vehicle.add(vid, routeID, typeID="vtypeauto")        
     plexe.set_path_cacc_parameters(vid, DISTANCE, 2, 1, 0.5)
-    plexe.set_cc_desired_speed(vid, random.randint(4,10))
+    # plexe.set_cc_desired_speed(vid, random.randint(4,10))
     # plexe.set_cc_desired_speed(vid, 10)
     plexe.set_acc_headway_time(vid, 1.5)
     plexe.use_controller_acceleration(vid, False)
@@ -38,10 +38,12 @@ def add_single_platoon(plexe, step, lane):
 
 
 def add_platoons(plexe,step):
-    spawn_vehs = np.random.poisson(TRAFFIC_DENSITY*N)
-    Manuevers = random.sample(LANE_NUM,spawn_vehs)
-    for lane in Manuevers:
-        add_single_platoon(plexe,step, lane)
+    grouped_lanes = group_keys(LANE_NUM)
+    for i in range(len(group_keys(LANE_NUM))):
+        spawn_vehs = np.random.poisson(TRAFFIC_DENSITY[i])
+        Manuevers = random.sample(grouped_lanes[i],spawn_vehs)
+        for lane in Manuevers:
+            add_single_platoon(plexe,step, lane)
 
 def intersect(A: list, B:list):
     """ intersects two lists"""
@@ -63,11 +65,21 @@ def intersection_manger(input_vehs,G: nx.graph):
         output_list = [".".join([incoming[j],j]) for j in output_list[0]]
     return output_list, input_vehs
 
-
+def group_keys(keys):
+    grouped_dict = {}
+    for key in keys:
+        starting_letter = key[0]
+        if starting_letter in grouped_dict:
+            grouped_dict[starting_letter].append(key)
+        else:
+            grouped_dict[starting_letter] = [key]
+    
+    grouped_list = list(grouped_dict.values())
+    return grouped_list
 
 def main():
     directory = "/home/arms04/autonomous_driving_stack/Intelligent_Intersection_management/Five_way"
-    sumo_cmd = ['sumo', '--duration-log.statistics', '--tripinfo-output',
+    sumo_cmd = ['sumo-gui', '--duration-log.statistics', '--tripinfo-output',
                  '{}/{}'.format(directory,sys.argv[2]),
                  '-c', '{}/SUMO_CFG/my_confg.sumo.cfg'.format(directory)]
     
@@ -94,7 +106,7 @@ def main():
                 odometry = traci.vehicle.getDistance(veh)
                 if (veh not in serving_list) and (JUNC_BOUND-APPROACHING_RGN <= odometry < JUNC_BOUND-DETECTION_RGN): 
                     serving_list.append(veh)
-                    plexe.set_cc_desired_speed(veh, 4.0) 
+                    plexe.set_cc_desired_speed(veh, 10.0) 
 
                 if (508<odometry) and (veh in serving_list):
                     serving_list.remove(veh)
@@ -111,13 +123,13 @@ def main():
                         action_list.append(veh)
                     
                     if (veh in output_list_ids) and (veh in action_list):
-                        plexe.set_cc_desired_speed(veh, 50.0)
+                        plexe.set_cc_desired_speed(veh, 20.0)
 
                 if (odometry > 506 ) and (veh in action_list):
                     action_list.remove(veh)
 
                 if odometry>JUNC_BOUND and veh not in action_list:
-                    plexe.set_cc_desired_speed(veh, 50.0)
+                    plexe.set_cc_desired_speed(veh, 20.0)
 
                 if (JUNC_BOUND < odometry <= 508):
                     c+=1
@@ -180,9 +192,11 @@ if __name__ == "__main__":
     APPROACHING_RGN = 25 + DETECTION_RGN
     # LANE_NUM = list(df.columns)
     LANE_NUM = conflict_matrix.keys()
-    TRAFFIC_DENSITY = int(sys.argv[1])/3600 # density in PCU/hr dvide by 3600 to get per second
     SPEED = 16.6  # m/s
+    N = 5  #nway junction
+    TRAFFIC_DENSITY = np.array([1/5,1/5,1/5,1/5,1/5])*(int(sys.argv[1])*N/3600) # density in PCU/hr/lane dvide by 3600 to get per second
+    
     ADD_PLATOON_PRO = 0.50
     ADD_PLATOON_STEP = 100# int(sys.argv[1])
-    N = 5  #nway junction
+    
     main()

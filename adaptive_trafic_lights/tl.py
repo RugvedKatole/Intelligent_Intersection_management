@@ -31,10 +31,23 @@ def add_single_platoon(plexe, step, lane):
 
 
 def add_platoons(plexe,step):
-    spawn_vehs = np.random.poisson(TRAFFIC_DENSITY*N)
-    Manuevers = random.sample(LANE_NUM,spawn_vehs)
-    for lane in Manuevers:
-        add_single_platoon(plexe,step, lane)
+    grouped_lanes = group_keys(LANE_NUM)
+    for i in range(len(group_keys(LANE_NUM))):
+        spawn_vehs = np.random.poisson(TRAFFIC_DENSITY[i])
+        Manuevers = random.sample(grouped_lanes[i],spawn_vehs)
+        for lane in Manuevers:
+            add_single_platoon(plexe,step, lane)
+
+def group_keys(keys):
+    grouped_dict = {}
+    for key in keys:
+        starting_letter = key[0]
+        if starting_letter in grouped_dict:
+            grouped_dict[starting_letter].append(key)
+        else:
+            grouped_dict[starting_letter] = [key]
+        grouped_list = list(grouped_dict.values())
+    return grouped_list
 
 
 def main():
@@ -72,9 +85,9 @@ if __name__ == "__main__":
         conflict_matrix[i]=[j for j in df[i] if j!= '0' or j!= 0]
 
     # LANE_NUM = list(df.columns)
+    N = 4  #nway junctionN = 4  #nway junction
     LANE_NUM = conflict_matrix.keys()
     SPEED = 16.6  # m/s
-    TRAFFIC_DENSITY = int(sys.argv[1])/3600 # density in PCU/hr/lane dvide by 3600 to get per second
+    TRAFFIC_DENSITY = np.array([0.4,0.3,0.2,0.1])*(int(sys.argv[1])*N/3600) # density in PCU/hr/lane dvide by 3600 to get per second
     ADD_PLATOON_STEP = 100 # int(sys.argv[1])
-    N = 4  #nway junction
     main()
