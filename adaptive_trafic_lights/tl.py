@@ -88,6 +88,6 @@ if __name__ == "__main__":
     N = 4  #nway junctionN = 4  #nway junction
     LANE_NUM = conflict_matrix.keys()
     SPEED = 16.6  # m/s
-    TRAFFIC_DENSITY = np.array([0.4,0.3,0.2,0.1])*(int(sys.argv[1])*N/3600) # density in PCU/hr/lane dvide by 3600 to get per second
+    TRAFFIC_DENSITY = np.array([0.4,0.4,0.1,0.1])*(int(sys.argv[1])*N/3600) # density in PCU/hr/lane dvide by 3600 to get per second
     ADD_PLATOON_STEP = 100 # int(sys.argv[1])
     main()

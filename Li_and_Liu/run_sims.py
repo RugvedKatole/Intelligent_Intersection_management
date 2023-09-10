@@ -14,7 +14,7 @@ Main_dir ="/home/arms04/autonomous_driving_stack/Intelligent_Intersection_manage
 for j in ["150","200","250","300","350"]:
 # def func(j):
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-    results_dir = '../results/unbalanced_1hour/{}_Li_and_Liu.xml'.format(j)
+    results_dir = '../results/unbalanced_1hour_41/{}_Li_and_Liu.xml'.format(j)
     os.system('python3 {}Li_Liu_4way.py {} {}'.format(Main_dir,j,results_dir))
     os.system('notify-send "Simulation completed for {} PCUs/lane/hr"'.format(j))
     with open('/home/arms04/autonomous_driving_stack/Intelligent_Intersection_management/Li_and_Liu/comp.csv','a+') as f:

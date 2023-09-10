@@ -10,20 +10,20 @@
     </gui_only>
 	-->
 
-	<route id="a_1" edges="a+ b-"/>
-	<route id="a_2" edges="a+ c-"/>
+	<route id="a_1" edges="a+ c-"/>
+	<route id="a_2" edges="a+ b-"/>
 	<route id="a_3" edges="a+ d-"/>	
 
-	<route id="b_1" edges="b+ c-"/>	
-	<route id="b_2" edges="b+ d-"/>
-	<route id="b_3" edges="b+ a-"/>
+	<route id="c_1" edges="c+ b-"/>	
+	<route id="c_2" edges="c+ d-"/>
+	<route id="c_3" edges="c+ a-"/>
 
-	<route id="c_1" edges="c+ d-"/>
-	<route id="c_2" edges="c+ a-"/>	
-	<route id="c_3" edges="c+ b-"/>
+	<route id="b_1" edges="b+ d-"/>
+	<route id="b_2" edges="b+ a-"/>	
+	<route id="b_3" edges="b+ c-"/>
 
 	<route id="d_1" edges="d+ a-"/>	
-	<route id="d_2" edges="d+ b-"/>
-	<route id="d_3" edges="d+ c-"/>
+	<route id="d_2" edges="d+ c-"/>
+	<route id="d_3" edges="d+ b-"/>
 	
 </routes>

@@ -70,7 +70,7 @@ def compute_leaving_time(veh):
 
 def main():
     sumo_cmd = ['sumo', '--duration-log.statistics', '--tripinfo-output', '{}/{}'.format(directory,sys.argv[2]),
-                 '-c', '{}/cfg/my_confg.sumo.cfg'.format(directory)]
+                 '-c', '{}/SUMO_CFG/my_confg.sumo.cfg'.format(directory)]
     traci.start(sumo_cmd)
     # 每次traci.simulationStep()之后都调用一次plexe 
     plexe = Plexe()
@@ -222,7 +222,7 @@ if __name__ == "__main__":
     V2I_RANGE = 200 
     N=4
     PLATOON_LENGTH = VEHICLE_LENGTH * PLATOON_SIZE + DISTANCE * (PLATOON_SIZE - 1)
-    TRAFFIC_DENSITY = np.array([0.25,0.25,0.25,0.25])*(int(sys.argv[1])*N/3600) 
+    TRAFFIC_DENSITY = np.array([0.4,0.4,0.1,0.1])*(int(sys.argv[1])*N/3600) 
     ADD_PLATOON_STEP = 100
     MAX_ACCEL = 2.6
     STOP_LINE = 20.0

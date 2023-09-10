@@ -196,10 +196,10 @@ if __name__ == "__main__":
     DETECTION_RGN = 5
     APPROACHING_RGN = 20 + DETECTION_RGN
     # LANE_NUM = list(df.columns)
-    LANE_NUM = conflict_matrix.keys()
+    LANE_NUM = sorted(conflict_matrix.keys())
     SPEED = 16.6  # m/s
     N = 4  #nway junctionN = 4  #nway junction
-    TRAFFIC_DENSITY = np.array([0.4,0.3,0.2,0.1])*(int(sys.argv[1])*N/3600) # density in PCU/hr/lane dvide by 3600 to get per second
+    TRAFFIC_DENSITY = np.array([0.4,0.4,0.1,0.1])*(int(sys.argv[1])*N/3600) # density in PCU/hr/lane dvide by 3600 to get per second
     ADD_PLATOON_PRO = 0.50
     ADD_PLATOON_STEP = 100 # int(sys.argv[1])
     
