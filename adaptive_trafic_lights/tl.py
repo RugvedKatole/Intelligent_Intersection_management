@@ -53,7 +53,7 @@ def group_keys(keys):
 def main():
 
     directory = "/home/arms04/autonomous_driving_stack/Intelligent_Intersection_management/adaptive_trafic_lights"
-    sumo_cmd = ['sumo', '--duration-log.statistics', '--tripinfo-output',
+    sumo_cmd = ['sumo-gui', '--duration-log.statistics', '--tripinfo-output',
                  '{}/{}'.format(directory,sys.argv[2]),
                  '-c', '{}/SUMO_CFG/my_confg.sumo.cfg'.format(directory)]
     

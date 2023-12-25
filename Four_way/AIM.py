@@ -71,12 +71,10 @@ def intersection_manger(input_vehs,G: nx.graph):
     input = incoming.keys()
     output_list = input
     Gs = G.subgraph(input)
-    output_list = sorted(sorted(list(nx.find_cliques(Gs)),key=len,reverse=True),key=lambda clique: sorted(clique,key=lambda man: man.split("_")[0]))
+    output_list = sorted(sorted(list(nx.find_cliques(Gs)),key=lambda clique: sorted(clique,key=lambda man: man.split("_")[0])),key=len,reverse=True)
     if len(output_list) != 0:
         output_list = [".".join([incoming[j],j]) for j in output_list[0]]
     return output_list, input_vehs
-
-
 
 
 def main():
@@ -178,7 +176,7 @@ def main():
 if __name__ == "__main__":
 
     conflict_matrix = {}
-    df = pd.read_csv("/home/arms04/autonomous_driving_stack/Intelligent_Intersection_management/Four_way/conflict_matrix_4way_compliment.csv")
+    df = pd.read_csv("/home/arms04/autonomous_driving_stack/Intelligent_Intersection_management/Four_way/harmony_mat.csv")
     for i in df.columns:
         conflict_matrix[i]=[j for j in df[i] if j!= '0' or j!= 0]
 
@@ -199,7 +197,7 @@ if __name__ == "__main__":
     LANE_NUM = sorted(conflict_matrix.keys())
     SPEED = 16.6  # m/s
     N = 4  #nway junctionN = 4  #nway junction
-    TRAFFIC_DENSITY = np.array([0.4,0.4,0.1,0.1])*(int(sys.argv[1])*N/3600) # density in PCU/hr/lane dvide by 3600 to get per second
+    TRAFFIC_DENSITY = np.array([0.25,0.25,0.25,0.25])*(int(sys.argv[1])*N/3600) # density in PCU/hr/lane dvide by 3600 to get per second
     ADD_PLATOON_PRO = 0.50
     ADD_PLATOON_STEP = 100 # int(sys.argv[1])
     

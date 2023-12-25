@@ -69,7 +69,7 @@ def compute_leaving_time(veh):
 
 
 def main():
-    sumo_cmd = ['sumo', '--duration-log.statistics', '--tripinfo-output', '{}/{}'.format(directory,sys.argv[2]),
+    sumo_cmd = ['sumo-gui', '--duration-log.statistics', '--tripinfo-output', '{}/{}'.format(directory,sys.argv[2]),
                  '-c', '{}/SUMO_CFG/my_confg.sumo.cfg'.format(directory)]
     traci.start(sumo_cmd)
     # 每次traci.simulationStep()之后都调用一次plexe 
